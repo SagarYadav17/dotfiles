@@ -1,0 +1,11 @@
+[user]
+	email = 47110215+SagarYadav17@users.noreply.github.com
+	name = Sagar Yadav
+[core]
+	editor = vi
+[pull]
+	rebase = false
+[push]
+	autoSetupRemote = true
+[init]
+	defaultBranch = main
