@@ -31,7 +31,7 @@ This repository contains configuration files for various tools and applications.
 5. Install `zsh-syntax-highlighting` if it is not already installed:
 
    ```sh
-   sudo dnf install zsh-syntax-highlighting
+   git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
    ```
 
 6. Run `stow` to create the necessary symlinks:
