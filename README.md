@@ -13,6 +13,10 @@ This repository contains configuration files for various tools and applications.
 2. Install `stow` and `zsh` if it is not already installed:
 
    ```sh
+   # For Ubuntu
+   sudo apt-get install stow zsh
+
+   # For Fedora and CentOS
    sudo dnf install stow zsh
    ```
 
