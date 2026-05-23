@@ -48,12 +48,4 @@ unset __conda_setup
 # Start ssh-agent if not already running
 if [ -z "$SSH_AUTH_SOCK" ]; then
    eval "$(ssh-agent -s)"
-    # Add all private SSH keys matching ~/.ssh/id_* (exclude public keys)
-    for key in "$HOME"/.ssh/id_*; do
-        [ -f "$key" ] || continue
-        case "$key" in
-            *.pub) continue ;;
-        esac
-        ssh-add "$key" >/dev/null 2>&1
-    done
 fi
