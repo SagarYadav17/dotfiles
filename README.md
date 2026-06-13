@@ -77,6 +77,18 @@ If you prefer manual setup, use the steps below.
 
 - `.zshrc`: Configuration for Zsh shell.
 - `.gitconfig`: Configuration for Git.
+- `nixos/configuration.nix`: NixOS system configuration, including system packages and zsh as the default shell for `sagar`.
+
+## NixOS
+
+To restore the shared NixOS configuration, copy it to `/etc/nixos/` and keep your machine-generated `hardware-configuration.nix` managed locally:
+
+```sh
+sudo cp nixos/configuration.nix /etc/nixos/
+sudo nixos-rebuild switch
+```
+
+The repo config intentionally avoids enabling a specific desktop environment or display manager, so GNOME, KDE Plasma, Hyprland, Xfce, or another desktop can be added in the host-specific NixOS config without conflicting with this backup.
 
 ## Usage
 
