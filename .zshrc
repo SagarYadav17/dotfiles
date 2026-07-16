@@ -49,3 +49,4 @@ unset __conda_setup
 if [ -z "$SSH_AUTH_SOCK" ]; then
    eval "$(ssh-agent -s)"
 fi
+eval "$(mise activate zsh)"
