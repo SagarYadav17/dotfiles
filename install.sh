@@ -64,14 +64,14 @@ install_system_packages() {
   fi
 }
 
-install_nvm() {
-  if [[ -d "$HOME/.nvm" ]]; then
-    log "nvm already installed"
+install_mise() {
+  if has_cmd mise; then
+    log "mise already installed"
     return
   fi
 
-  log "Installing nvm"
-  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+  log "Installing mise"
+  curl -fsSL https://mise.run | sh
 }
 
 install_uv() {
@@ -131,7 +131,7 @@ stow_dotfiles() {
 main() {
   log "Starting dotfiles installation"
   install_system_packages
-  install_nvm
+  install_mise
   install_uv
   install_oh_my_zsh
   install_zsh_plugins

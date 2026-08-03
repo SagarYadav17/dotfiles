@@ -16,7 +16,7 @@ Run the installer script:
 ./install.sh
 ```
 
-The script installs dependencies, sets up `nvm`, `uv`, `oh-my-zsh`, required zsh plugins, and runs `stow`.
+The script installs dependencies, sets up `mise`, `uv`, `oh-my-zsh`, required zsh plugins, and runs `stow`.
 
 If you prefer manual setup, use the steps below.
 
@@ -36,10 +36,10 @@ If you prefer manual setup, use the steps below.
    git clone https://github.com/sagaryadav17/dotfiles.git $HOME/dotfiles
    ```
 
-3. Install nvm
+3. Install mise (runtime version manager)
 
    ```sh
-   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
+   curl https://mise.run | sh
    ```
 
 4. Install uv (Python package and project manager)
