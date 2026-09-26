@@ -18,6 +18,8 @@ Run the installer script:
 
 The script installs dependencies (including `unzip` and `btop`), sets up `mise`, `uv`, Bun, `oh-my-zsh`, required zsh plugins, runs `stow`, and links the repository's custom skills into `$HOME/.agents/skills`.
 
+The installer requires Bash. You can also run `bash ./install.sh`; invoking it with `sh ./install.sh` automatically restarts it in Bash.
+
 If you prefer manual setup, use the steps below.
 
 1. Install dependencies if they are not already installed:

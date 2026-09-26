@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# Restart in Bash when invoked explicitly with sh.
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec bash "$0" "$@"
+fi
+
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
