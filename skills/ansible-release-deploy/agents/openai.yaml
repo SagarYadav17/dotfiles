@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ansible Release Deployment"
+  short_description: "Deploy OCI releases with Ansible and maintain changelog entries."
+  default_prompt: "Create or update an Ansible deployment workflow for an OCI release, including changelog.md updates and rollback safety."

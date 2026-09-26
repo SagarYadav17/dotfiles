@@ -1,0 +1,4 @@
+interface:
+  display_name: "Changelog Manager"
+  short_description: "Create and maintain Keep a Changelog files"
+  default_prompt: "Create or update the project changelog and document the maintenance convention."

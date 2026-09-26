@@ -1,0 +1,4 @@
+interface:
+  display_name: "OCI Release Workflow"
+  short_description: "Build and verify immutable Linux OCI release bundles."
+  default_prompt: "Create or update an OCI release-bundle workflow with reproducible build, verification, and rollback-safe packaging."

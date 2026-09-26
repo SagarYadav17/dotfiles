@@ -16,7 +16,7 @@ Run the installer script:
 ./install.sh
 ```
 
-The script installs dependencies, sets up `mise`, `uv`, `oh-my-zsh`, required zsh plugins, and runs `stow`.
+The script installs dependencies (including `unzip` and `btop`), sets up `mise`, `uv`, Bun, `oh-my-zsh`, required zsh plugins, runs `stow`, and links the repository's custom skills into `$HOME/.agents/skills`.
 
 If you prefer manual setup, use the steps below.
 
@@ -24,10 +24,10 @@ If you prefer manual setup, use the steps below.
 
    ```sh
    # For Ubuntu
-   sudo apt-get install stow zsh git curl wget ripgrep
+   sudo apt-get install stow zsh git curl wget ripgrep unzip btop
 
    # For Fedora
-   sudo dnf install stow zsh git curl wget ripgrep
+   sudo dnf install stow zsh git curl wget ripgrep unzip btop
    ```
 
 2. Clone the repository to your `$HOME` directory:
@@ -54,29 +54,43 @@ If you prefer manual setup, use the steps below.
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
    ```
 
-6. Install `zsh-autosuggestions` if it is not already installed:
+6. Install Bun if it is not already installed:
+
+   ```sh
+   curl -fsSL https://bun.com/install | bash
+   ```
+
+7. Install `zsh-autosuggestions` if it is not already installed:
 
    ```sh
    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
    ```
 
-7. Install `zsh-syntax-highlighting` if it is not already installed:
+8. Install `zsh-syntax-highlighting` if it is not already installed:
 
    ```sh
    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
    ```
 
-8. Run `stow` to create the necessary symlinks:
+9. Run `stow` to create the necessary symlinks:
 
    ```sh
    cd $HOME/dotfiles
    stow .
    ```
 
+10. Link custom skills for other agents:
+
+   ```sh
+   mkdir -p "$HOME/.agents"
+   ln -s "$HOME/dotfiles/skills" "$HOME/.agents/skills"
+   ```
+
 ## Contents
 
 - `.zshrc`: Configuration for Zsh shell.
 - `.gitconfig`: Configuration for Git.
+- `skills/`: Custom agent skills shared through `$HOME/.agents/skills`.
 
 ## Usage
 

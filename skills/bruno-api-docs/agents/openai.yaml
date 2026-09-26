@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bruno API Documentation"
+  short_description: "Keep Bruno API collections aligned with backend contracts."
+  default_prompt: "Document or update API endpoints in the repository Bruno collection from backend routes and schemas."

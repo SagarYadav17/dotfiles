@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend SEO"
+  short_description: "Audit and implement SEO for frontend projects"
+  default_prompt: "Audit and improve this frontend project’s technical and on-page SEO."

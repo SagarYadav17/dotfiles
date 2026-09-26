@@ -46,7 +46,7 @@ backup_if_regular_file() {
 }
 
 install_system_packages() {
-  local packages=(stow zsh git curl wget ripgrep)
+  local packages=(stow zsh git curl wget ripgrep unzip btop)
 
   log "Checking required system packages"
 
@@ -82,6 +82,16 @@ install_uv() {
 
   log "Installing uv"
   curl -LsSf https://astral.sh/uv/install.sh | sh
+}
+
+install_bun() {
+  if has_cmd bun; then
+    log "Bun already installed"
+    return
+  fi
+
+  log "Installing Bun"
+  curl -fsSL https://bun.com/install | bash
 }
 
 install_oh_my_zsh() {
@@ -128,14 +138,42 @@ stow_dotfiles() {
   (cd "$REPO_DIR" && stow --restow --target "$HOME" .)
 }
 
+link_custom_skills() {
+  local skills_dir="$REPO_DIR/skills"
+  local target="$HOME/.agents/skills"
+
+  mkdir -p "$HOME/.agents"
+
+  if [[ -L "$target" ]]; then
+    if [[ "$(readlink -f "$target")" == "$(readlink -f "$skills_dir")" ]]; then
+      log "Custom skills already linked"
+      return
+    fi
+
+    error "$target is already a symlink to another location. Move it before rerunning."
+    exit 1
+  fi
+
+  if [[ -e "$target" ]]; then
+    local backup="${target}.backup-${STAMP}"
+    mv "$target" "$backup"
+    log "Preserved existing skills directory at $backup"
+  fi
+
+  ln -s "$skills_dir" "$target"
+  log "Linked custom skills to $target"
+}
+
 main() {
   log "Starting dotfiles installation"
   install_system_packages
   install_mise
   install_uv
+  install_bun
   install_oh_my_zsh
   install_zsh_plugins
   stow_dotfiles
+  link_custom_skills
 
   log "Installation complete"
   log "Open a new shell session or run: exec zsh"
