@@ -143,15 +143,15 @@ stow_dotfiles() {
   (cd "$REPO_DIR" && stow --restow --target "$HOME" .)
 }
 
-link_custom_skills() {
-  local skills_dir="$REPO_DIR/skills"
-  local target="$HOME/.agents/skills"
+link_skills_target() {
+  local skills_dir="$1"
+  local target="$2"
 
-  mkdir -p "$HOME/.agents"
+  mkdir -p "$(dirname "$target")"
 
   if [[ -L "$target" ]]; then
     if [[ "$(readlink -f "$target")" == "$(readlink -f "$skills_dir")" ]]; then
-      log "Custom skills already linked"
+      log "Custom skills already linked at $target"
       return
     fi
 
@@ -167,6 +167,18 @@ link_custom_skills() {
 
   ln -s "$skills_dir" "$target"
   log "Linked custom skills to $target"
+}
+
+link_custom_skills() {
+  local skills_dir="$REPO_DIR/skills"
+
+  # ~/.agents/skills: Codex, Antigravity, and other tools following the
+  # shared agents-skills convention.
+  link_skills_target "$skills_dir" "$HOME/.agents/skills"
+
+  # ~/.claude/skills: Claude Code only scans this fixed location, not
+  # ~/.agents/skills.
+  link_skills_target "$skills_dir" "$HOME/.claude/skills"
 }
 
 main() {
