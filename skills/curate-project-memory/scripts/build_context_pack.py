@@ -38,20 +38,16 @@ def terms(values: list[str]) -> set[str]:
     return {normalize(token) for value in values for token in TOKEN.findall(value) if len(token) > 2}
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("project_folder", type=Path)
-    parser.add_argument("--query", default="")
-    parser.add_argument("--code-path", action="append", default=[])
-    parser.add_argument("--limit", type=int, default=5)
-    parser.add_argument("--include-history", action="store_true")
-    args = parser.parse_args()
-    root = args.project_folder.resolve()
+def rank_context(project_folder: Path, query: str = "", code_paths: list[str] | None = None,
+                 limit: int = 5, include_history: bool = False) -> dict[str, object]:
+    """Shared ranking for the CLI and cross-agent resume manifests."""
+    root = project_folder.resolve()
     if not root.is_dir():
-        parser.error(f"project folder does not exist: {root}")
+        raise ValueError(f"project folder does not exist: {root}")
+    code_paths = code_paths or []
 
-    query_terms = terms([args.query, *args.code_path])
-    requested_paths = {normalize(item) for item in args.code_path}
+    query_terms = terms([query, *code_paths])
+    requested_paths = {normalize(item) for item in code_paths}
     foundational: list[dict[str, object]] = []
     candidates: list[dict[str, object]] = []
 
@@ -65,10 +61,13 @@ def main() -> int:
         title_match = HEADING.search(text)
         title = title_match.group(1).strip() if title_match else path.stem
 
-        if path.name.casefold() in {"project home.md", "project.md", "current state.md"}:
+        if path.name.casefold() in {"project home.md", "project.md", "current state.md", "handoff.md"}:
             foundational.append({"file": relative, "title": title, "reason": "foundational project context"})
             continue
-        if status in EXCLUDED and not args.include_history:
+        # Task selection belongs to the resume helper, not general note ranking.
+        if props.get("type") == "task-checkpoint" and not include_history:
+            continue
+        if status in EXCLUDED and not include_history:
             continue
 
         searchable = normalize(f"{relative}\n{title}\n{yaml_text}\n{text}")
@@ -84,7 +83,7 @@ def main() -> int:
             score += 20
             reasons.insert(0, "references code path: " + ", ".join(exact_paths))
 
-        fuzzy = SequenceMatcher(None, normalize(args.query), normalize(title)).ratio() if args.query and title else 0.0
+        fuzzy = SequenceMatcher(None, normalize(query), normalize(title)).ratio() if query and title else 0.0
         if fuzzy >= 0.5:
             score += round(fuzzy * 6)
             reasons.append(f"fuzzy title similarity {fuzzy:.2f}")
@@ -122,16 +121,31 @@ def main() -> int:
         })
 
     candidates.sort(key=lambda item: (-int(item["score"]), str(item["file"]).casefold()))
-    selected = candidates[: max(0, args.limit)]
-    print(json.dumps({
+    selected = candidates[: max(0, limit)]
+    return {
         "project_folder": str(root),
-        "query": args.query,
-        "code_paths": args.code_path,
+        "query": query,
+        "code_paths": code_paths,
         "foundational": foundational,
         "selected": selected,
         "candidate_count": len(candidates),
         "selection_note": "Ranking is a retrieval aid; inspect selected notes before relying on them.",
-    }, indent=2))
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("project_folder", type=Path)
+    parser.add_argument("--query", default="")
+    parser.add_argument("--code-path", action="append", default=[])
+    parser.add_argument("--limit", type=int, default=5)
+    parser.add_argument("--include-history", action="store_true")
+    args = parser.parse_args()
+    try:
+        result = rank_context(args.project_folder, args.query, args.code_path, args.limit, args.include_history)
+    except ValueError as error:
+        parser.error(str(error))
+    print(json.dumps(result, indent=2))
     return 0
 
 

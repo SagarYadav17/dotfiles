@@ -1,17 +1,19 @@
 ---
 name: curate-project-memory
-description: Give Claude lasting project context in a local Obsidian-compatible Markdown vault. Use when a user asks PMC to set up or connect the project's Obsidian vault, scan or explain a codebase, create a Project Home, remember a decision, constraint, discovery, procedure, debugging lesson, or current state, recall what Claude already knows, prepare a handoff, check whether notes are stale or contradictory, relate code to knowledge, keep something session-only, export or share reviewed context, or resume work from existing project notes.
+description: Share curated project context between Claude and Codex through a local Obsidian-compatible vault. Use PMC to register a project, resume or hand off work, checkpoint progress, remember explicit decisions, retrieve relevant notes, or review stale and conflicting knowledge. Automatic orientation and saving are opt-in through local configuration.
 ---
 
 # Curate Project Memory
 
 Use conversation as the interface. Do not ask the user to run commands or edit configuration manually. Use your normal file tools and request narrowly scoped filesystem permission when needed.
 
+The shared continuity helper requires Python 3.10 or later, Git, and access to the configured local vault.
+
 ## First-run experience
 
 When the user invokes PMC and no project registration exists for the current repository, lead with a concise guided setup instead of describing the architecture:
 
-1. Explain in one sentence: "PMC gives Claude lasting project context in an Obsidian vault you control."
+1. Explain in one sentence: "PMC gives your coding agents shared project context in an Obsidian vault you control."
 2. Ask whether to create a new vault or connect an existing Obsidian vault. Ask only this one question first.
 3. After that choice, ask for or confirm the vault path, infer the current repository, and propose a readable project name.
 4. Complete the vault setup and project registration conversationally. Do not require the user to know commands, markers, folder layouts, or configuration formats.
@@ -82,18 +84,21 @@ Trigger on requests such as "create an overview of this codebase", "scan this pr
 4. Link useful notes from `Project Home.md` and keep it concise enough to scan quickly in Obsidian.
 5. Report the evidence inspected and the exact vault files created or updated.
 
-## Use the vault as a project source
+## Shared automatic orientation and checkpoints
 
-Claude has ordinary filesystem access to any local path, including a vault that lives outside the current repository, so no separate "attach folder" step is required. Read and edit only relevant notes. Put automatic-orientation guidance in the primary code repository's `CLAUDE.md` after explicit opt-in, since that is the file Claude loads automatically for that repository; the vault's own `CLAUDE.md` (if any) is not loaded automatically for other projects.
+Use the same machine-local configuration and vault for Claude and Codex. Read `references/shared-continuity.md` before configuring cross-agent continuity, resuming a task, or saving a task checkpoint. The user's request to enable this workflow is its opt-in; do not ask for the same approval again.
+
+- Run `scripts/project_context.py resume --repo <working-directory> --query <user-request>` with Python 3. It resolves nested directories and worktrees, returns foundational notes and up to five ranked notes, and selects branch-appropriate tasks. Read the returned files before relying on them.
+- Load project context once per task when `automation.load_on_start` is enabled. An explicit PMC resume also works without automatic loading. Verify Git evidence, and flag stale notes instead of treating timestamps as proof.
+- Ask which objective to continue when several relevant active tasks match. Keep the selected task ID and saved revision across milestones. Start a separate checkpoint for unrelated work, including concurrent chats on the same branch.
+- When `automation.save_progress` is enabled, save after establishing a substantive task, meaningful milestones, blockers, and before the final response. Use `scripts/project_context.py checkpoint` with structured JSON through stdin. Follow `assets/task-checkpoint.md`; do not manually overwrite checkpoints.
+- When `automation.save_confirmed_decisions` is enabled, explicit user choices count as durable markers. Apply duplicate, evidence, branch, and conflict checks. Inferences remain proposals; conflicts, deletion, and supersession still require an explicit resolution.
+- Keep branch progress in `Tasks/`, not canonical released state. The helper updates a managed active-task index in `Handoff.md`, preserving existing canonical prose. Completed checkpoints remain available but leave default resume retrieval.
+- Respect modes that prohibit writing. Briefly report unavailable context or unsaved progress. Saving is instruction-driven; abrupt termination can lose work since the last milestone.
 
 ## Enable automatic project orientation
 
-1. Confirm that the user wants relevant durable notes read at the beginning of future sessions for this repository.
-2. Copy the managed block from `assets/claude-project-memory.md` into the primary repository's `CLAUDE.md`; create that file only when necessary.
-3. Replace the project ID token and preserve all unrelated instructions.
-4. Do not include an absolute vault or repository path in `CLAUDE.md`.
-5. On future sessions, load `Project.md` and `Current State.md` first, then follow only relevant links.
-6. If the vault is unavailable or permission is missing, continue safely and state that project-memory context was not loaded.
+After the user opts in, follow `references/automatic-orientation.md`. Install managed blocks into both agents' global guidance and the registered repositories using `scripts/project_context.py install`. Preserve unrelated instructions, imports, and symlinks. Store stable project IDs in repository guidance; keep absolute paths only in machine-local configuration. Use `assets/project-memory.md` for the shared project block and `assets/global-project-memory.md` for global discovery. Never place bootstrap guidance only in the vault's own instructions.
 
 ## Recognize markers
 
@@ -117,6 +122,8 @@ Treat these natural requests as first-class equivalents:
 Markers never bypass secret filtering or conflict checks.
 
 ## Prompt for knowledge worth keeping
+
+When `automation.save_confirmed_decisions` is enabled, explicit user choices and corrections already authorize recording those decisions after the normal checks; do not ask again. The prompting workflow below applies to other unmarked candidates, including implementation discoveries and inferred lessons.
 
 Do not rely on the user to remember a special marker. During ordinary project work, notice information that is likely to matter in a future task, especially:
 
@@ -147,7 +154,7 @@ Before promotion, inspect the repository branch and revision when Git is availab
 
 1. Read `references/context-packs.md`.
 2. Run `scripts/build_context_pack.py <project-folder> --query <task>` yourself to produce a deterministic candidate ranking; pass each relevant repository-relative path with `--code-path`.
-3. Always inspect the project's `Project.md` and `Current State.md` when available, then inspect only the highest-value ranked candidates required for safe work.
+3. Always inspect the project's `Project Home.md`, `Project.md`, `Current State.md`, and `Handoff.md` when available, then inspect only the highest-value ranked candidates required for safe work.
 4. Exclude rejected, deprecated, and superseded knowledge except when historical context is necessary.
 5. State briefly which additional notes were loaded and why. Never load the entire vault by default.
 6. If terminology mismatch leaves important knowledge undiscovered, offer the optional local similarity index from `references/local-similarity.md`; keep its generated index outside the vault and inspect every returned note.
@@ -194,7 +201,7 @@ For "@PMC check this project's memory" or "check whether these notes are out of 
 
 ## Create a handoff brief
 
-On wrap-up, project restart, or explicit handoff request, update `Handoff.md` from `assets/handoff.md`. Keep it one-page in spirit: objective, current position, recent work, accepted decisions, blockers, open questions, next actions, and relevant links. Treat it as a generated navigation aid, not a replacement for canonical notes.
+On wrap-up, project restart, or explicit handoff request, update `Handoff.md` from `assets/handoff.md`. Keep it one-page in spirit: objective, current position, recent work, accepted decisions, blockers, open questions, next actions, and relevant links. Treat it as a generated navigation aid, not a replacement for canonical notes. Preserve the helper-managed active-task index; never replace task progress with canonical project claims.
 
 ## Wrap up
 
@@ -206,8 +213,9 @@ Trigger on requests such as "wrap up", "finish for today", or "summarize this se
 4. Propose durable updates separately from the summary.
 5. Apply only approved durable changes.
 6. Update `Handoff.md` after approved durable changes when it would materially help the next session.
-7. Never imply that a complete transcript was archived.
+7. If progress saving is enabled and writes are allowed, save the task checkpoint before responding.
+8. Never imply that a complete transcript was archived.
 
 ## Resume work
 
-Read `Project Home.md`, `Project.md`, `Current State.md`, and only the relevant linked notes. Summarize current status, known constraints, unresolved questions, and likely next steps. Flag stale or contradictory notes instead of guessing which is correct.
+Follow `references/shared-continuity.md` and run the resume helper. Read its foundational notes, selected task, and relevant notes. Summarize the next action briefly; ask only when task selection is ambiguous. Verify current Git state and flag stale or contradictory context.

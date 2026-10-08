@@ -18,7 +18,7 @@ It penalizes rejected, deprecated, and superseded notes. Ranking is a retrieval 
 
 ## Selection order
 
-1. Load `Project Home.md`, `Project.md`, and `Current State.md` for the stable project ID.
+1. Load `Project Home.md`, `Project.md`, `Current State.md`, and `Handoff.md` for the stable project ID.
 2. Extract task terms, named components, workstreams, and repository-relative file paths.
 3. Follow direct links and backlinks that match those signals.
 4. Prefer accepted, active, confirmed, and recently reviewed notes.
@@ -38,3 +38,7 @@ Loaded [[ADR-012 Token expiry]] because it references src/tokens/issuer.ts.
 ```
 
 Mention important unavailable or stale context. Do not expose hidden reasoning or produce a long retrieval report.
+
+## Working progress
+
+The shared resume helper calls this same ranking function. Task checkpoints are selected separately by task relevance and Git branch, not mixed into general note retrieval. Default context packs exclude all task checkpoints; `--include-history` permits explicit historical retrieval. Read `shared-continuity.md` before resuming or saving task progress.

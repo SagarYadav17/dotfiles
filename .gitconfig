@@ -3,9 +3,18 @@
     name = Sagar Yadav
 [core]
     editor = vi
+    autocrlf = input
 [pull]
     rebase = false
 [push]
     autoSetupRemote = true
+[fetch]
+    prune = true
 [init]
     defaultBranch = main
+# Work repositories (~/work/): put a different identity in ~/.gitconfig.work (not tracked), e.g.
+#   [user]
+#       email = you@work.example
+# A missing file is ignored. The path is matched against the repository's .git directory.
+[includeIf "gitdir:~/work/"]
+    path = ~/.gitconfig.work

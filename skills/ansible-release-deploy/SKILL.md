@@ -13,6 +13,7 @@ Use this skill when deploying a versioned OCI bundle to a VPS with Ansible. Insp
 - Require encrypted vault variables for first install; use `no_log` for secrets and never commit credentials. Validate Compose before starting services.
 - Load images, run migrations in documented order, start Compose, wait for loopback health, assert required services, then verify public HTTPS health from the controller.
 - Rollback targets a retained release, requires its `.env` and Compose file, never deletes persistent volumes, and repeats health/service checks.
+- Enforce release retention so old releases do not pile up: after a fully healthy deploy (never on rollback or failure), keep the newest N versions by semver (configurable, default 3, minimum 2) plus whatever `current` points at, and prune the rest: release directory, uploaded bundle, and that version's images, then dangling layers. Match only semantic-version directory names, never prune the just-deployed or active release, and never remove volumes. Document the retention setting and that rollback can only target retained versions.
 
 Every user-visible deployment workflow change must update the repository's `changelog.md` (or established case-equivalent such as `CHANGELOG.md`) with a concise Unreleased entry. Preserve existing format and do not invent release dates.
 

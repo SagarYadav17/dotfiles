@@ -9,6 +9,15 @@
     "schema_version": {"const": 1},
     "mode": {"enum": ["review", "manual"]},
     "vault_path": {"type": "string", "minLength": 1},
+    "automation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "load_on_start": {"type": "boolean", "default": false},
+        "save_progress": {"type": "boolean", "default": false},
+        "save_confirmed_decisions": {"type": "boolean", "default": false}
+      }
+    },
     "session_summaries": {
       "type": "object",
       "additionalProperties": false,

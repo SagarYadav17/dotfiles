@@ -6,6 +6,7 @@ Use the deterministic checker for structural signals, then inspect the affected 
 
 - missing or inconsistent `project_id`;
 - missing required properties by note type;
+- task checkpoint status, agent, timezone-aware timestamp, and matching filename under `Tasks/`;
 - overdue `review_after` dates;
 - old current-state notes without a review date;
 - accepted decisions that claim to be superseded but lack `superseded_by`;

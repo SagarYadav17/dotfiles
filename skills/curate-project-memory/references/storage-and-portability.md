@@ -44,6 +44,20 @@ Configuration shape:
 
 Use `config.schema.json` in this reference directory when validating the shape. Create or update the file atomically where the available filesystem tools permit it. Preserve unrelated registered projects. Never place credentials in this file.
 
+## Optional automation
+
+Configuration version 1 optionally accepts:
+
+```json
+"automation": {
+  "load_on_start": true,
+  "save_progress": true,
+  "save_confirmed_decisions": true
+}
+```
+
+Each omitted field defaults to false, preserving existing behavior. Enabling progress checkpoints does not enable session summaries. Follow `shared-continuity.md` for task saving and confirmed-decision rules. The registry is shared by both agents.
+
 ## Shared vault content
 
 Durable notes use only:

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Shared Project Memory"
+  short_description: "Resume shared project work across Claude and Codex"
+  default_prompt: "Use $curate-project-memory to load this project's shared context and resume the relevant task."

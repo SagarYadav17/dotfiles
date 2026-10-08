@@ -48,8 +48,12 @@ Default to review mode:
 
 ## Provenance
 
-Durable notes may record the date and a short human-readable source label such as `Claude work session`. Do not store internal session IDs, trace IDs, transcript paths, or machine-specific metadata in published-vault content.
+Durable notes may record the date and a short human-readable source label such as `Claude work session` or `Codex work session`. Do not store internal session IDs, trace IDs, transcript paths, or machine-specific metadata in published-vault content.
 
 ## Secret handling
 
 Never save passwords, API keys, access tokens, private keys, cookies, MFA codes, or authentication secrets. If the conversation contains one, do not repeat it. Record only a safe operational fact when genuinely useful, such as "rotate the exposed credential."
+
+## Opt-in confirmed decisions
+
+When local `automation.save_confirmed_decisions` is enabled, an explicit user choice or correction is a confirmed durable marker even without a special prefix. Check duplicates, evidence, and branch scope before recording it. This setting never approves inferences, resolves conflicts, or authorizes deletion/supersession. Generated PMC task IDs identify curated working notes; they are independent of internal agent conversation or trace IDs. Working checkpoints contain progress summaries, not transcripts, and do not establish released project state.

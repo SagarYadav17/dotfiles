@@ -7,7 +7,7 @@ import argparse
 import json
 import re
 from collections import Counter
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 
@@ -28,6 +28,7 @@ REQUIRED = {
     "decision": {"project_id", "status", "updated", "confidence"},
     "handoff": {"project_id", "updated"},
     "promotion-inbox": {"project_id", "updated"},
+    "task-checkpoint": {"project_id", "task_id", "updated", "status", "agent", "branch", "revision", "git_fingerprint"},
 }
 
 
@@ -109,6 +110,20 @@ def main() -> int:
         for required in REQUIRED.get(note_type, set()):
             if not props.get(required):
                 add(findings, "error", "missing-property", relative, f"{note_type} note is missing {required}.")
+
+        if note_type == "task-checkpoint":
+            if props.get("status") not in {"active", "blocked", "completed"}:
+                add(findings, "error", "invalid-task-status", relative, "Task must be active, blocked, or completed.")
+            if props.get("agent") not in {"claude", "codex"}:
+                add(findings, "error", "invalid-task-agent", relative, "Task source must be claude or codex.")
+            if props.get("task_id") != path.stem or path.parent != root / "Tasks":
+                add(findings, "error", "invalid-task-location", relative, "Task ID must match its filename under Tasks/.")
+            try:
+                datetime_value = datetime.fromisoformat(props.get("updated", ""))
+                if datetime_value.tzinfo is None:
+                    raise ValueError("timezone missing")
+            except ValueError:
+                add(findings, "error", "invalid-task-timestamp", relative, "Task updated must be an ISO timestamp with a timezone.")
 
         review_after = props.get("review_after")
         if review_after:

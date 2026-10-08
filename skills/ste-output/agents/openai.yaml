@@ -1,0 +1,4 @@
+interface:
+  display_name: "STE Output"
+  short_description: "Write and rewrite text in ASD-STE100 Simplified Technical English"
+  default_prompt: "Rewrite this text in Simplified Technical English and list what you changed."

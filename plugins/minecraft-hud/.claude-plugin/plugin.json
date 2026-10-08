@@ -1,0 +1,5 @@
+{
+  "name": "minecraft-hud",
+  "version": "0.1.0",
+  "description": "Minecraft survival HUD above the prompt: hearts = 5-hour usage left, hunger = 7-day usage left, XP bar = context window."
+}

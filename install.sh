@@ -36,17 +36,54 @@ run_with_privileges() {
   fi
 }
 
+# Move a regular file out of the way before stow links it. A file with the same content as the
+# repository copy (second argument) is removed without a backup.
 backup_if_regular_file() {
   local target="$1"
+  local source="${2:-}"
 
   if [[ -L "$target" ]]; then
     return
   fi
 
   if [[ -f "$target" ]]; then
+    if [[ -n "$source" ]] && cmp -s "$source" "$target"; then
+      rm -f "$target"
+      log "Replaced $target (same content as the repository copy)"
+      return
+    fi
+
     local backup="${target}.backup-${STAMP}"
     mv "$target" "$backup"
     log "Backed up $target -> $backup"
+  fi
+}
+
+# RHEL (and clones) have stow, ripgrep and btop only in EPEL.
+enable_epel_on_rhel() {
+  local id="" id_like="" major
+  if [[ -r /etc/os-release ]]; then
+    # shellcheck disable=SC1091
+    id="$(. /etc/os-release && echo "${ID:-}")"
+    id_like="$(. /etc/os-release && echo "${ID_LIKE:-}")"
+  fi
+
+  if [[ "$id" == "fedora" || "$id_like" != *rhel* && "$id" != "rhel" ]]; then
+    return
+  fi
+
+  if rpm -q epel-release >/dev/null 2>&1; then
+    log "EPEL already enabled"
+  else
+    major="$(rpm -E %rhel)"
+    log "Enabling EPEL $major"
+    run_with_privileges dnf install -y \
+      "https://dl.fedoraproject.org/pub/epel/epel-release-latest-${major}.noarch.rpm" \
+      || warn "Could not enable EPEL; stow, ripgrep and btop may be missing."
+  fi
+
+  if has_cmd crb; then
+    run_with_privileges crb enable || warn "Could not enable CodeReady Builder (crb)."
   fi
 }
 
@@ -59,13 +96,11 @@ install_system_packages() {
     run_with_privileges apt-get update
     run_with_privileges apt-get install -y "${packages[@]}"
   elif has_cmd dnf; then
+    enable_epel_on_rhel
     run_with_privileges dnf install -y "${packages[@]}"
-  elif has_cmd pacman; then
-    run_with_privileges pacman -Sy --noconfirm "${packages[@]}"
-  elif has_cmd zypper; then
-    run_with_privileges zypper --non-interactive install "${packages[@]}"
   else
-    warn "Unsupported package manager. Install these manually: ${packages[*]}"
+    error "Unsupported system. This installer supports apt (Ubuntu) and dnf (Fedora, RHEL) only."
+    exit 1
   fi
 }
 
@@ -87,6 +122,35 @@ install_uv() {
 
   log "Installing uv"
   curl -LsSf https://astral.sh/uv/install.sh | sh
+}
+
+install_graphify() {
+  # uv puts its tools in ~/.local/bin; the uv installer does not change PATH of this script.
+  export PATH="$HOME/.local/bin:$PATH"
+
+  if ! has_cmd uv; then
+    warn "uv not found; skipping graphify"
+    return
+  fi
+
+  if uv tool list 2>/dev/null | grep -q '^graphifyy '; then
+    log "graphify already installed"
+    return
+  fi
+
+  log "Installing graphify"
+  uv tool install graphifyy
+}
+
+install_graphify_skill() {
+  export PATH="$HOME/.local/bin:$PATH"
+  has_cmd graphify || return 0
+
+  # ~/.claude/skills and ~/.agents/skills point into this repo, so this writes skills/graphify
+  # (git-ignored). It must run after link_custom_skills.
+  log "Installing graphify skill"
+  graphify install --platform claude || warn "graphify skill install (claude) failed"
+  graphify install --platform agents || warn "graphify skill install (agents) failed"
 }
 
 install_bun() {
@@ -136,11 +200,24 @@ install_zsh_plugins() {
 }
 
 stow_dotfiles() {
-  backup_if_regular_file "$HOME/.zshrc"
-  backup_if_regular_file "$HOME/.gitconfig"
+  # Create the folders first. With --no-folding stow links single files into them; without these
+  # folders stow would link the whole folder into the repository, and Claude Code and Codex would
+  # write credentials and sessions there.
+  mkdir -p "$HOME/.claude" "$HOME/.codex"
+
+  backup_if_regular_file "$HOME/.zshrc" "$REPO_DIR/.zshrc"
+  backup_if_regular_file "$HOME/.gitconfig" "$REPO_DIR/.gitconfig"
+  backup_if_regular_file "$HOME/.claude/CLAUDE.md" "$REPO_DIR/.claude/CLAUDE.md"
+  backup_if_regular_file "$HOME/.codex/AGENTS.md" "$REPO_DIR/.claude/CLAUDE.md"
 
   log "Linking dotfiles with stow"
-  (cd "$REPO_DIR" && stow --restow --target "$HOME" .)
+  (cd "$REPO_DIR" && stow --no-folding --restow --target "$HOME" .)
+
+  # Codex reads the same global instructions as Claude Code: one tracked file, two links.
+  ln -sfn "$REPO_DIR/.claude/CLAUDE.md" "$HOME/.codex/AGENTS.md"
+
+  # Git does not store this mode; the global Claude instructions are private.
+  chmod 600 "$REPO_DIR/.claude/CLAUDE.md"
 }
 
 link_skills_target() {
@@ -186,11 +263,13 @@ main() {
   install_system_packages
   install_mise
   install_uv
+  install_graphify
   install_bun
   install_oh_my_zsh
   install_zsh_plugins
   stow_dotfiles
   link_custom_skills
+  install_graphify_skill
 
   log "Installation complete"
   log "Open a new shell session or run: exec zsh"

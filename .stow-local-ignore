@@ -1,4 +1,11 @@
 \.git
+\.gitignore
+\.gitattributes
 README\.md
+CHANGELOG\.MD
+LICENSE
 install\.sh
-^skills(/|$)
+install\.ps1
+\.stow-local-ignore
+^/skills$
+^/plugins$

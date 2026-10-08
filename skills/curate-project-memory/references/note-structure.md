@@ -43,6 +43,10 @@ Copy `assets/promotion-inbox.md`. Candidates in this file are proposals, not dur
 
 Copy `assets/handoff.md`. Regenerate it from canonical notes; do not place unique decisions only in the handoff.
 
+### Task checkpoints
+
+`Tasks/task-<generated-id>.md` stores branch-scoped working progress shared by both agents. Generate it with `scripts/project_context.py checkpoint` using `assets/task-checkpoint.md`; do not manually construct its metadata. Task status values are `active`, `blocked`, and `completed`, distinct from durable knowledge status. Lasting decisions live in canonical notes and are linked from tasks. Completed checkpoints are excluded from default retrieval. The handoff has a helper-managed active-task index.
+
 ### Coverage map
 
 Copy `assets/coverage.md`. Generate it from declared project `coverage_areas` and tagged notes. Treat it as a derived navigation view, not canonical knowledge.
@@ -88,7 +92,7 @@ Copy `assets/session-summary.md` only when session summaries are enabled or expl
 
 ### Automatic orientation
 
-Copy the managed block from `assets/claude-project-memory.md` into the primary code repository's `CLAUDE.md` only after the user opts in. Preserve unrelated instructions and store no absolute paths.
+After opt-in, install `assets/project-memory.md` through the shared helper into both agents' applicable repository guidance. Follow `automatic-orientation.md`; preserve unrelated instructions, imports, and symlinks.
 
 ## Code references
 
