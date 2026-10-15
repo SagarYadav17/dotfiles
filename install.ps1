@@ -31,18 +31,16 @@ $WingetPackages = @(
     "Termius.Termius",
     "7zip.7zip",
     "Oven-sh.Bun",
-    "Google.AntigravityIDE",
     "Bruno.Bruno",
     "Stremio.Stremio",
-    "Google.Chrome",
     "Google.AndroidStudio",
-    "Microsoft.Teams",
-    "ZedIndustries.Zed",
+    "Microsoft.VisualStudioCode",
     "Anthropic.Claude",
     "Obsidian.Obsidian",
-    "astral-sh.uv"
+    "astral-sh.uv",
+    "Spotify.Spotify"
 )
-$PythonVersion = "3.13"
+$PythonVersion = "3.14"
 
 function Write-Info  { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Cyan }
 function Write-Warn  { param($Message) Write-Host "[WARN] $Message" -ForegroundColor Yellow }

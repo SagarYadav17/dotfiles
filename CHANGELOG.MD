@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-15
+
+### Changed
+
+- `install.ps1` now installs Python 3.14, Visual Studio Code, and Spotify.
+- `install.ps1` no longer installs Antigravity, Chrome, Teams, or Zed.
+
 ## [1.0.0] - 2026-10-08
 
 First tagged release. Supports Ubuntu, Fedora, RHEL and Windows.
