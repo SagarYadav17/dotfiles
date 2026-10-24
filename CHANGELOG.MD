@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- The README gives one `winget install` command for Windows. You do not need to clone the repository.
+
+### Removed
+
+- `install.ps1` and all other Windows setup (Python, `graphify`, skill links, Git line endings).
+- The `*.ps1` rule in `.gitattributes`.
+
 ## [1.0.1] - 2026-10-15
 
 ### Changed

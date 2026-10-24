@@ -2,9 +2,6 @@
 # and the "---" frontmatter of SKILL.md files.
 * text=auto eol=lf
 
-# PowerShell reads CRLF scripts without surprises on Windows PowerShell 5.1.
-*.ps1 text eol=crlf
-
 # Never change these.
 *.png binary
 *.jpg binary

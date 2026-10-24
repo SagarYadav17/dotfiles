@@ -24,20 +24,13 @@ The installer requires Bash. You can also run `bash ./install.sh`; invoking it w
 
 ## Windows
 
-Run `install.ps1` from PowerShell 7 (or Windows PowerShell) in the Windows clone of this repository:
+Windows has no installer script and needs no clone. Paste this in PowerShell to install the applications with `winget`:
 
 ```powershell
-pwsh -ExecutionPolicy Bypass -File .\install.ps1
+winget install --id=Valve.Steam -e --silent ; winget install --id=Discord.Discord -e --silent ; winget install --id=7zip.7zip -e --silent ; winget install --id=Spotify.Spotify -e --silent ; winget install --id=Microsoft.PowerShell -e --silent ; winget install --id=EpicGames.EpicGamesLauncher -e --silent ; winget install --id=Stremio.Stremio -e --silent
 ```
 
-It does four things; skip any of them with `-SkipPackages`, `-SkipPython`, `-SkipGraphify` or `-SkipSkills`:
-
-1. Installs the applications listed in `$WingetPackages` with `winget` (already installed ones are skipped).
-2. Installs a global Python 3.13 with `uv` (`python` and `python3` in `%USERPROFILE%\.local\bin`). Turn off the `python.exe` and `python3.exe` entries in Settings > Apps > Advanced app settings > App execution aliases, or the Microsoft Store stub hides `python3`.
-3. Installs `graphify` with `uv tool install graphifyy`.
-4. Links `skills/` to `%USERPROFILE%\.claude\skills` and `%USERPROFILE%\.agents\skills`, and links `.claude\CLAUDE.md` into your user folder as both `.claude\CLAUDE.md` and `.codex\AGENTS.md` (a copy if symlinks are not allowed). Creating symlinks needs Developer Mode or an Administrator shell.
-
-Keep a separate clone on Windows and sync through git. Under WSL2 the skills are linked by `install.sh` inside Linux.
+Under WSL2, `install.sh` runs inside Linux as usual.
 
 If you prefer manual setup, use the steps below.
 
@@ -123,7 +116,7 @@ If you prefer manual setup, use the steps below.
 - `.claude/CLAUDE.md`: Global instructions for Claude Code and Codex (the Project Memory block). `~/.codex/AGENTS.md` is a second link to this one file, so the two cannot differ. Edit the copy in this repository, not the one in your home folder: some editors replace a symlink with a normal file.
 - `skills/`: Custom agent skills shared through `$HOME/.agents/skills` and `$HOME/.claude/skills`.
 - `plugins/`: Claude Code plugins that are not skills (for example `minecraft-hud`). They are not linked automatically.
-- `install.sh`, `install.ps1`: Installers for Linux and Windows.
+- `install.sh`: Installer for Linux.
 - `CHANGELOG.MD`: Notable changes. Add each notable change under `Unreleased`, in Keep a Changelog categories and ASD-STE100 Simplified Technical English (skill `ste-output`).
 
 ## Usage
