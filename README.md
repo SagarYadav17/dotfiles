@@ -112,6 +112,7 @@ If you prefer manual setup, use the steps below.
 ## Contents
 
 - `.zshrc`: Configuration for Zsh shell.
+- `.profile`: Login-shell `PATH`. It adds the mise shims (`~/.local/share/mise/shims`), so `node` and `codex` work in bash, in non-interactive shells and in desktop apps, not only in an interactive zsh. Log out and log in again after the first install.
 - `.gitconfig`: Configuration for Git (`core.autocrlf=input`, `fetch.prune=true`). Repositories under `~/work/` also read `~/.gitconfig.work`, which is not tracked: create it on a machine that needs another identity.
 - `.claude/CLAUDE.md`: Global instructions for Claude Code and Codex (the Project Memory block). `~/.codex/AGENTS.md` is a second link to this one file, so the two cannot differ. Edit the copy in this repository, not the one in your home folder: some editors replace a symlink with a normal file.
 - `skills/`: Custom agent skills shared through `$HOME/.agents/skills` and `$HOME/.claude/skills`.

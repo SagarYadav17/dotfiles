@@ -207,6 +207,7 @@ stow_dotfiles() {
 
   backup_if_regular_file "$HOME/.zshrc" "$REPO_DIR/.zshrc"
   backup_if_regular_file "$HOME/.gitconfig" "$REPO_DIR/.gitconfig"
+  backup_if_regular_file "$HOME/.profile" "$REPO_DIR/.profile"
   backup_if_regular_file "$HOME/.claude/CLAUDE.md" "$REPO_DIR/.claude/CLAUDE.md"
   backup_if_regular_file "$HOME/.codex/AGENTS.md" "$REPO_DIR/.claude/CLAUDE.md"
 

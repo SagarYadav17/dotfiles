@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Skill `dispatch-agents`: Claude plans and reviews. Codex and `agy` do the coding in separate git worktrees. The script `run_worker.sh` runs one worker and returns code 75 when the worker reaches its usage limit.
+- `.profile`: adds the mise shims to `PATH`. Bash, non-interactive shells and desktop apps now find `node` and `codex`. `install.sh` backs up an existing `~/.profile` before `stow` links it.
+
 ### Changed
 
 - The README gives one `winget install` command for Windows. You do not need to clone the repository.
