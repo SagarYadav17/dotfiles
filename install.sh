@@ -250,13 +250,17 @@ link_skills_target() {
 link_custom_skills() {
   local skills_dir="$REPO_DIR/skills"
 
-  # ~/.agents/skills: Codex, Antigravity, and other tools following the
-  # shared agents-skills convention.
+  # ~/.agents/skills: Codex and other tools following the shared
+  # agents-skills convention.
   link_skills_target "$skills_dir" "$HOME/.agents/skills"
 
   # ~/.claude/skills: Claude Code only scans this fixed location, not
   # ~/.agents/skills.
   link_skills_target "$skills_dir" "$HOME/.claude/skills"
+
+  # ~/.gemini/config/skills: the Antigravity CLI (agy) reads global skills only
+  # here; it reads .agents/skills inside a project, not in $HOME.
+  link_skills_target "$skills_dir" "$HOME/.gemini/config/skills"
 }
 
 main() {

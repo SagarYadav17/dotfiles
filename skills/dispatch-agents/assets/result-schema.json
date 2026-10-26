@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "changed", "open"],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["done", "partial", "blocked"],
+      "description": "done: the task is finished. partial: some work is not done. blocked: you could not start or continue."
+    },
+    "changed": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Repository-relative paths of the files you changed."
+    },
+    "open": {
+      "type": "string",
+      "description": "Work not done, blockers, risks, and commands you could not run. Use \"none\" if there are none."
+    }
+  }
+}

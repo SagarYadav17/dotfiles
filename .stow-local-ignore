@@ -7,4 +7,3 @@ LICENSE
 install\.sh
 \.stow-local-ignore
 ^/skills$
-^/plugins$

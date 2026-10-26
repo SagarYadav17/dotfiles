@@ -16,7 +16,7 @@ Run the installer script:
 ./install.sh
 ```
 
-The script installs dependencies (including `unzip` and `btop`), sets up `mise`, `uv`, `graphify` (`uv tool install graphifyy`), Bun, `oh-my-zsh`, required zsh plugins, runs `stow`, and links the repository's custom skills into `$HOME/.agents/skills`.
+The script installs dependencies (including `unzip` and `btop`), sets up `mise`, `uv`, `graphify` (`uv tool install graphifyy`), Bun, `oh-my-zsh`, required zsh plugins, runs `stow`, and links the repository's custom skills into `$HOME/.agents/skills`, `$HOME/.claude/skills` and `$HOME/.gemini/config/skills`.
 
 The installer requires Bash and supports `apt` (Ubuntu) and `dnf` (Fedora, RHEL). On RHEL and its clones it first enables EPEL (and CodeReady Builder when `crb` exists), because `stow`, `ripgrep` and `btop` come from there.
 
@@ -107,6 +107,10 @@ If you prefer manual setup, use the steps below.
    ```sh
    mkdir -p "$HOME/.agents"
    ln -s "$HOME/dotfiles/skills" "$HOME/.agents/skills"
+
+   # Antigravity CLI (agy) reads global skills only from this folder
+   mkdir -p "$HOME/.gemini/config"
+   ln -s "$HOME/dotfiles/skills" "$HOME/.gemini/config/skills"
    ```
 
 ## Contents
@@ -114,9 +118,8 @@ If you prefer manual setup, use the steps below.
 - `.zshrc`: Configuration for Zsh shell.
 - `.profile`: Login-shell `PATH`. It adds the mise shims (`~/.local/share/mise/shims`), so `node` and `codex` work in bash, in non-interactive shells and in desktop apps, not only in an interactive zsh. Log out and log in again after the first install.
 - `.gitconfig`: Configuration for Git (`core.autocrlf=input`, `fetch.prune=true`). Repositories under `~/work/` also read `~/.gitconfig.work`, which is not tracked: create it on a machine that needs another identity.
-- `.claude/CLAUDE.md`: Global instructions for Claude Code and Codex (the Project Memory block). `~/.codex/AGENTS.md` is a second link to this one file, so the two cannot differ. Edit the copy in this repository, not the one in your home folder: some editors replace a symlink with a normal file.
-- `skills/`: Custom agent skills shared through `$HOME/.agents/skills` and `$HOME/.claude/skills`.
-- `plugins/`: Claude Code plugins that are not skills (for example `minecraft-hud`). They are not linked automatically.
+- `.claude/CLAUDE.md`: Global instructions for Claude Code and Codex: the Project Memory block, and STE (skill `ste-output`) as the default writing style. Say "stop ste" or "normal mode" to turn STE off for one session. The Antigravity CLI (`agy`) has no global rules file, so it does not get these instructions. `~/.codex/AGENTS.md` is a second link to this one file, so the two cannot differ. Edit the copy in this repository, not the one in your home folder: some editors replace a symlink with a normal file.
+- `skills/`: Custom agent skills shared through `$HOME/.agents/skills` (Codex), `$HOME/.claude/skills` (Claude Code) and `$HOME/.gemini/config/skills` (Antigravity CLI, `agy`).
 - `install.sh`: Installer for Linux.
 - `CHANGELOG.MD`: Notable changes. Add each notable change under `Unreleased`, in Keep a Changelog categories and ASD-STE100 Simplified Technical English (skill `ste-output`).
 
