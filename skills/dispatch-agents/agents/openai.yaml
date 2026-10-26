@@ -1,4 +1,4 @@
 interface:
   display_name: "Dispatch Agents"
-  short_description: "Send coding tasks to Codex and agy in git worktrees, then review and merge"
+  short_description: "Send coding tasks to Codex in git worktrees, then review and merge"
   default_prompt: "Use $dispatch-agents to split this work into tasks, send them to worker agents, and review the results."

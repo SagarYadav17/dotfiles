@@ -1,33 +1,33 @@
 #!/usr/bin/env bash
-# Run one worker agent (codex or agy) on one brief, in its own git worktree, then run the checks
-# and print a short report.
+# Run Codex as a worker on one brief, in its own git worktree, then run the checks and print a
+# short report.
 #
-# Usage: run_worker.sh <codex|agy> <task-id> <brief-file> [--repo DIR] [--base REF] [--model NAME]
-#                      [--check CMD]... [--allow GLOB]...
+# Usage: run_worker.sh <task-id> <brief-file> [--repo DIR] [--base REF] [--model NAME]
+#                      [--check CMD]... [--allow GLOB]... [--review]
 #
 # The worker edits files in the worktree and does not commit. The caller reads the report,
 # commits and merges. --check runs a command in the worktree after the worker (repeatable).
 # --allow limits the files the worker may change; "*" also matches "/" (repeatable).
+# --review asks Codex ("codex exec review") to review the worktree changes; it uses Codex usage.
 # Environment: DISPATCH_TIMEOUT (worker, default 1800 s), DISPATCH_CHECK_TIMEOUT (each check,
 # default 600 s).
-# Exit code: 0 done and clean, 3 needs review, 75 usage limit (try another agent),
+# Exit code: 0 done and clean, 3 needs review, 75 usage limit (wait for the reset),
 # 1 worker failure or time limit, 2 bad usage.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PREAMBLE="$SCRIPT_DIR/../assets/worker-preamble.md"
 SCHEMA="$SCRIPT_DIR/../assets/result-schema.json"
-# agy takes the prompt as one argument, and Linux limits one argument to 128 KiB.
-MAX_PROMPT_BYTES=100000
 
 die() { echo "[ERROR] $1" >&2; exit "${2:-1}"; }
 info() { echo "[INFO] $*"; }
 
-USAGE="Usage: run_worker.sh <codex|agy> <task-id> <brief-file> [--repo DIR] [--base REF] [--model NAME] [--check CMD]... [--allow GLOB]..."
-[ $# -ge 3 ] || die "$USAGE" 2
+USAGE="Usage: run_worker.sh <task-id> <brief-file> [--repo DIR] [--base REF] [--model NAME] [--check CMD]... [--allow GLOB]... [--review]"
+[ $# -ge 2 ] || die "$USAGE" 2
+case "$1" in codex|agy) die "The agent argument was removed; Codex is the only worker. $USAGE" 2 ;; esac
 
-AGENT="$1"; TASK="$2"; BRIEF="$3"; shift 3
-REPO=""; BASE="HEAD"; MODEL=""; CHECKS=(); ALLOW=()
+TASK="$1"; BRIEF="$2"; shift 2
+REPO=""; BASE="HEAD"; MODEL=""; CHECKS=(); ALLOW=(); REVIEW=""
 while [ $# -gt 0 ]; do
     case "$1" in
         --repo)  REPO="${2:?--repo needs a value}"; shift 2 ;;
@@ -35,11 +35,11 @@ while [ $# -gt 0 ]; do
         --model) MODEL="${2:?--model needs a value}"; shift 2 ;;
         --check) CHECKS+=("${2:?--check needs a value}"); shift 2 ;;
         --allow) ALLOW+=("${2:?--allow needs a value}"); shift 2 ;;
+        --review) REVIEW=1; shift ;;
         *) die "Unknown option: $1" 2 ;;
     esac
 done
 
-case "$AGENT" in codex|agy) ;; *) die "Agent must be codex or agy, not '$AGENT'" 2 ;; esac
 [[ "$TASK" =~ ^[a-z0-9][a-z0-9._-]*$ ]] || die "Task id must match [a-z0-9][a-z0-9._-]*" 2
 [ -f "$BRIEF" ] || die "Brief file not found: $BRIEF" 2
 [ -f "$PREAMBLE" ] && [ -f "$SCHEMA" ] || die "Skill assets are missing in $SCRIPT_DIR/../assets"
@@ -48,10 +48,10 @@ command -v python3 >/dev/null || die "python3 is required for the report"
 REPO="$(git -C "${REPO:-.}" rev-parse --show-toplevel)" || die "Not a git repository"
 
 # .profile puts the mise shims on PATH; "mise which" covers a shell without them.
-AGENT_BIN="$(command -v "$AGENT" 2>/dev/null || mise which "$AGENT" 2>/dev/null || true)"
-[ -n "$AGENT_BIN" ] || die "$AGENT is not installed or not on PATH"
+CODEX="$(command -v codex 2>/dev/null || mise which codex 2>/dev/null || true)"
+[ -n "$CODEX" ] || die "codex is not installed or not on PATH"
 # codex is a node script, so its folder (which holds node) must be on PATH.
-export PATH="$(dirname "$AGENT_BIN"):$PATH"
+export PATH="$(dirname "$CODEX"):$PATH"
 
 WT_ROOT="$(dirname "$REPO")/$(basename "$REPO")-wt"
 WT="$WT_ROOT/$TASK"
@@ -68,36 +68,18 @@ else
 fi
 START="$(git -C "$WT" rev-parse HEAD)"
 
-P="$OUT/$TASK.$AGENT"
-PROMPT="$P.prompt.md"; RAW="$P.raw"; RESULT="$P.result.json"; LOG="$P.log"
-CHECK_LOG="$P.checks.jsonl"; SUMMARY="$P.summary.json"
-{
-    cat "$PREAMBLE"
-    # Headless agy denies every shell command and then ends the turn with no reply.
-    if [ "$AGENT" = agy ]; then
-        printf '\nThis run cannot execute shell commands. Do not try to run any command, not even to read files or run tests. Use only your file tools to read and edit files.\n'
-    fi
-    printf '\n\n'
-    cat "$BRIEF"
-} > "$PROMPT"
+P="$OUT/$TASK"
+PROMPT="$P.prompt.md"; EVENTS="$P.events.jsonl"; RESULT="$P.result.json"; LOG="$P.log"
+CHECK_LOG="$P.checks.jsonl"; SUMMARY="$P.summary.json"; REVIEW_FILE="$P.review.md"
+rm -f "$REVIEW_FILE"
+{ cat "$PREAMBLE"; printf '\n\n'; cat "$BRIEF"; } > "$PROMPT"
 : > "$RESULT"; : > "$CHECK_LOG"
-if [ "$AGENT" = agy ] && [ "$(wc -c < "$PROMPT")" -gt "$MAX_PROMPT_BYTES" ]; then
-    die "The brief is too large for agy (limit $MAX_PROMPT_BYTES bytes with the preamble). Shorten it." 2
-fi
 
-info "Starting $AGENT on task $TASK"
+info "Starting codex on task $TASK"
+python3 "$SCRIPT_DIR/notify.py" sent --task "$TASK" --brief "$BRIEF" || true
 set +e
-case "$AGENT" in
-    codex)
-        timeout "${DISPATCH_TIMEOUT:-1800}" "$AGENT_BIN" exec -C "$WT" -s workspace-write --json \
-            --output-schema "$SCHEMA" -o "$RESULT" ${MODEL:+-m "$MODEL"} - < "$PROMPT" > "$RAW" 2> "$LOG"
-        ;;
-    agy)
-        (cd "$WT" && timeout "${DISPATCH_TIMEOUT:-1800}" "$AGENT_BIN" -p "$(cat "$PROMPT")" \
-            --mode accept-edits --output-format json --json-schema "$SCHEMA" ${MODEL:+--model "$MODEL"}) \
-            > "$RAW" 2> "$LOG"
-        ;;
-esac
+timeout "${DISPATCH_TIMEOUT:-1800}" "$CODEX" exec -C "$WT" -s workspace-write --json \
+    --output-schema "$SCHEMA" -o "$RESULT" ${MODEL:+-m "$MODEL"} - < "$PROMPT" > "$EVENTS" 2> "$LOG"
 STATUS=$?
 
 # Run the checks only when the worker finished; a failed run has nothing to check.
@@ -108,6 +90,11 @@ if [ "$STATUS" -eq 0 ]; then
         python3 -c 'import json,sys; c,r,o=sys.argv[1],int(sys.argv[2]),sys.argv[3]
 print(json.dumps({"cmd":c,"exit":r,"tail":o.splitlines()[-20:] if r else []}))' "$cmd" "$rc" "$out" >> "$CHECK_LOG"
     done
+    # A second look in a new Codex session; a failed review is not fatal.
+    if [ -n "$REVIEW" ]; then
+        (cd "$WT" && timeout "${DISPATCH_TIMEOUT:-1800}" "$CODEX" exec review --uncommitted \
+            -o "$REVIEW_FILE") > "$P.review.log" 2>&1 || rm -f "$REVIEW_FILE"
+    fi
 fi
 set -e
 
@@ -115,6 +102,6 @@ ALLOW_ARGS=()
 for glob in "${ALLOW[@]}"; do ALLOW_ARGS+=(--allow "$glob"); done
 
 echo "---"
-exec python3 "$SCRIPT_DIR/worker_report.py" --agent "$AGENT" --task "$TASK" --status "$STATUS" \
-    --worktree "$WT" --branch "$BRANCH" --base "$START" --raw "$RAW" --result "$RESULT" --log "$LOG" \
-    --checks "$CHECK_LOG" --summary "$SUMMARY" "${ALLOW_ARGS[@]}"
+exec python3 "$SCRIPT_DIR/worker_report.py" --task "$TASK" --status "$STATUS" \
+    --worktree "$WT" --branch "$BRANCH" --base "$START" --events "$EVENTS" --result "$RESULT" --log "$LOG" \
+    --checks "$CHECK_LOG" --summary "$SUMMARY" ${REVIEW:+--review "$REVIEW_FILE"} "${ALLOW_ARGS[@]}"

@@ -4,6 +4,7 @@ Rules:
 
 - Work only in the current directory. Do not read or change files outside it.
 - Change only the files that the task names or clearly needs. Do not refactor other code.
+- Make the smallest complete change. Use the code, helpers and libraries the project already has. Do not add abstractions, options or "for later" code that the task does not need. A smaller diff is faster to review.
 - Do not run `git commit`, `git push`, `git checkout`, `git reset` or `git stash`. The orchestrator commits.
 - Do not add dependencies unless the task says so.
 - Run the checks that the task lists, if you can. If a check fails, fix the cause. Do not edit a test to make it pass.

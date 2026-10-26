@@ -8,7 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- Skill `dispatch-agents`: Claude plans and reviews. Codex and `agy` do the coding in separate git worktrees. The script `run_worker.sh` runs one worker and returns code 75 when the worker reaches its usage limit.
+- `dispatch-agents`: optional Discord notices (`scripts/notify.py`). A notice is posted only when a webhook URL is in `~/.config/dispatch-agents/discord-webhook` or `DISPATCH_DISCORD_WEBHOOK`. Notices hold ids, codes, counts and flag names, never code or logs.
+- `run_worker.sh --review`: Codex reviews the worktree changes with `codex exec review`. The review uses Codex usage, not Claude tokens.
+
+- Skill `dispatch-agents`: Claude plans and reviews. Codex does the coding in separate git worktrees. The script `run_worker.sh` runs one Codex task and returns code 75 when Codex reaches its usage limit.
 - `.profile`: adds the mise shims to `PATH`. Bash, non-interactive shells and desktop apps now find `node` and `codex`. `install.sh` backs up an existing `~/.profile` before `stow` links it.
 
 - `run_worker.sh` options `--check` and `--allow`. The script runs the checks in the worktree after the worker, compares the diff with the allow-list, and prints a short report. The report flags edited tests, dependency files, files outside the allow-list and worker commits.
@@ -22,7 +25,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `run_worker.sh` looks for usage-limit words only in the agent's own error messages. Before, test output with `429` or `quota` gave a false code 75.
 - The worker preamble tells workers to use a skill only when the brief names it, and not to use project memory or `dispatch-agents`.
 - `dispatch-agents` merges task branches into a local integration branch `dispatch/<goal-id>`. The base branch gets one squashed commit for the whole goal. Task commits and merges stay local and are never pushed.
-- `agy` workers use only file tools. Headless `agy` denies shell commands and then stops with no reply.
+- The worker preamble asks for the smallest complete change, after the rules of the Ponytail plugin. A smaller diff costs fewer review tokens.
+- `dispatch-agents` says when to use the Codex plugin (`codex:rescue`) and when to use this skill.
+- `dispatch-agents` uses only Codex as a worker. `run_worker.sh` has no agent argument now: `run_worker.sh <task-id> <brief-file> ...`. Reason: headless `agy` denies all shell commands. `agy` still reads the shared skills.
 - The README gives one `winget install` command for Windows. You do not need to clone the repository.
 
 ### Removed
