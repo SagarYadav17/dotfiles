@@ -317,8 +317,8 @@ def validate_payload(data: dict) -> None:
         raise ValueError("Unsupported checkpoint fields; transcripts and arbitrary session data are not accepted.")
     if not isinstance(data.get("objective"), str) or not data["objective"].strip() or "\n" in data["objective"] or "\r" in data["objective"]:
         raise ValueError("objective must be a non-empty single-line summary.")
-    if data.get("status") not in {"active", "blocked", "completed"} or data.get("agent") not in {"claude", "codex"}:
-        raise ValueError("Checkpoint requires active/blocked/completed status and claude/codex agent.")
+    if data.get("status") not in {"active", "blocked", "completed"} or data.get("agent") not in {"claude", "codex", "kimi"}:
+        raise ValueError("Checkpoint requires active/blocked/completed status and claude/codex/kimi agent.")
     for field in LIST_FIELDS:
         value = data.get(field)
         if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() or "\n" in item or "\r" in item for item in value):

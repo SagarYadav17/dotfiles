@@ -114,8 +114,8 @@ def main() -> int:
         if note_type == "task-checkpoint":
             if props.get("status") not in {"active", "blocked", "completed"}:
                 add(findings, "error", "invalid-task-status", relative, "Task must be active, blocked, or completed.")
-            if props.get("agent") not in {"claude", "codex"}:
-                add(findings, "error", "invalid-task-agent", relative, "Task source must be claude or codex.")
+            if props.get("agent") not in {"claude", "codex", "kimi"}:
+                add(findings, "error", "invalid-task-agent", relative, "Task source must be claude, codex, or kimi.")
             if props.get("task_id") != path.stem or path.parent != root / "Tasks":
                 add(findings, "error", "invalid-task-location", relative, "Task ID must match its filename under Tasks/.")
             try:

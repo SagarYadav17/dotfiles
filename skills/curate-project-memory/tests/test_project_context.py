@@ -100,6 +100,14 @@ class SharedContextTests(unittest.TestCase):
         self.assertEqual(resumed["completed"][-1], "Updated Bruno")
         self.assertEqual(resumed["next_actions"], ["Run integration checks"])
 
+    def test_kimi_can_continue_a_task_and_unknown_agents_are_rejected(self):
+        first = self.save_task()
+        second = self.save_task(agent="kimi", task_id=first["task_id"], expected_revision=first["saved_revision"],
+                                completed=["Kimi milestone"])
+        self.assertEqual(pm.read_task(Path(second["file"]))["agent"], "kimi")
+        with self.assertRaisesRegex(ValueError, "agent"):
+            self.save_task(agent="other")
+
     def test_ambiguous_tasks_are_not_merged(self):
         first = self.save_task()
         second = self.save_task(objective="Optimize inventory lookup", next_actions=["Measure inventory query"])
