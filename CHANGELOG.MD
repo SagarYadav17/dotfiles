@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `.claude-plugin/marketplace.json`: the repository is now a Claude Code plugin marketplace. Run `/plugin marketplace add SagarYadav17/dotfiles` and `/plugin install sagar-skills@sagar` to get the skills without symlinks. `.stow-local-ignore` skips `.claude-plugin`.
 - `dispatch-agents`: optional Discord notices (`scripts/notify.py`). A notice is posted only when a webhook URL is in `~/.config/dispatch-agents/discord-webhook` or `DISPATCH_DISCORD_WEBHOOK`. Notices hold ids, codes, counts and flag names, never code or logs.
 - `run_worker.sh --review`: Codex reviews the worktree changes with `codex exec review`. The review uses Codex usage, not Claude tokens.
 

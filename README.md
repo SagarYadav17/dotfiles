@@ -113,6 +113,24 @@ If you prefer manual setup, use the steps below.
    ln -s "$HOME/dotfiles/skills" "$HOME/.gemini/config/skills"
    ```
 
+## Install skills from GitHub (Claude Code)
+
+This repository is also a Claude Code plugin marketplace. Use it on a device where you do not run `install.sh`. Run these commands in Claude Code:
+
+```
+/plugin marketplace add SagarYadav17/dotfiles
+/plugin install sagar-skills@sagar
+```
+
+Skills get the prefix `sagar-skills:`, for example `/sagar-skills:ste-output`. To get new commits, run `/plugin marketplace update sagar`, or turn on auto-update for the marketplace in `/plugin`.
+
+Notes:
+
+- The marketplace serves Claude Code only. Codex and the Antigravity CLI still need the `install.sh` links.
+- Do not use both methods on one device. Each skill would load twice.
+- `graphify` is not in the marketplace. The command `graphify install` creates it.
+- `curate-project-memory` runs scripts by path. The global `CLAUDE.md` names `~/.agents/skills` and `~/.claude/skills`. A plugin install keeps the skills in the plugin cache, so use the `install.sh` links on devices that need project memory.
+
 ## Contents
 
 - `.zshrc`: Configuration for Zsh shell.

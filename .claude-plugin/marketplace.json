@@ -1,0 +1,13 @@
+{
+  "name": "sagar",
+  "description": "Custom agent skills from SagarYadav17/dotfiles",
+  "owner": { "name": "Sagar Yadav" },
+  "plugins": [
+    {
+      "name": "sagar-skills",
+      "source": "./",
+      "description": "Custom skills: project memory, STE writing, changelog, SEO, Bruno docs, OCI release deploy and Codex dispatch",
+      "skills": ["./skills/"]
+    }
+  ]
+}
