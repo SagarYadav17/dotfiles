@@ -1,6 +1,6 @@
 ---
 name: curate-project-memory
-description: Share curated project context between Claude and Codex through a local Obsidian-compatible vault. Use PMC to register a project, resume or hand off work, checkpoint progress, remember explicit decisions, retrieve relevant notes, or review stale and conflicting knowledge. Automatic orientation and saving are opt-in through local configuration.
+description: Share curated project context across coding agents through a local Obsidian-compatible vault, with optional project knowledge in Notion. Use PMC to register a project, resume work, save checkpoints, retrieve notes, or review knowledge. Automatic orientation and saving are opt-in.
 ---
 
 # Curate Project Memory
@@ -27,12 +27,14 @@ Read `references/project-profiles.md` when choosing registration defaults.
 
 Read `references/local-similarity.md` before building or querying the optional machine-local similarity index.
 
+Read `references/notion-project-knowledge.md` when the user requests Notion project knowledge or links a project to Notion.
+
 Read `references/storage-and-portability.md` for setup or project registration. Read `references/automatic-orientation.md` when the user wants the vault added as a project source or wants future sessions to load project notes without a prompt. Read `references/durable-note-policy.md` before promoting, changing, or removing knowledge. Read `references/note-structure.md` when creating notes. Read `references/context-packs.md` when orienting or resuming work. Read `references/knowledge-health.md` before auditing a vault. Read `references/code-traceability.md` when relating notes to source files. Read `references/branch-awareness.md` before promoting knowledge discovered on a branch or worktree. Read `references/drift-detection.md` before creating or running verification checks. Read `references/coverage.md` before assessing documentation coverage. Read `references/team-collaboration.md` before configuring shared-vault ownership or reviews. Read `references/exports.md` before creating a portable brief or audit artifact. Read `references/obsidian-companion.md` when installing, configuring, or responding to review actions from the optional Obsidian companion.
 
 ## Boundaries
 
 - Operate only on local paths that the user selects or places in scope.
-- Do not upload, transmit, or add telemetry.
+- Do not transmit vault content unless the user authorizes a specific external destination and scope. Do not add telemetry.
 - Do not request or capture complete raw chat transcripts.
 - Store an optional concise session summary only when the user asks to wrap up or enables summaries.
 - Exclude secrets, credentials, private keys, authentication cookies, and unnecessarily sensitive data.
