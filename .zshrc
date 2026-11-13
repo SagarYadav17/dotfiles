@@ -24,13 +24,19 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-# Start ssh-agent if not already running
+# Reuse the user service when the session did not provide an agent.
 if [ -z "$SSH_AUTH_SOCK" ]; then
-   eval "$(ssh-agent -s)"
+    if [ -n "$XDG_RUNTIME_DIR" ] && command -v systemctl >/dev/null 2>&1 &&
+       systemctl --user start dotfiles-ssh-agent.service >/dev/null 2>&1 &&
+       [ -S "$XDG_RUNTIME_DIR/dotfiles-ssh-agent.sock" ]; then
+        export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/dotfiles-ssh-agent.sock"
+    else
+        eval "$(ssh-agent -s)"
+    fi
 fi
 eval "$(mise activate zsh)"
 
 # bun
 export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
-export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$PATH:$BUN_INSTALL/bin"
 [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"

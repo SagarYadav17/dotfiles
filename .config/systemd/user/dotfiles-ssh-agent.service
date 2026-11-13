@@ -1,0 +1,9 @@
+[Unit]
+Description=SSH agent for dotfiles shell sessions
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/ssh-agent -a %t/dotfiles-ssh-agent.sock
+
+[Install]
+WantedBy=default.target

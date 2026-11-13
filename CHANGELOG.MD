@@ -8,13 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Share one SSH agent across shell sessions with systemd.
+
+- Add a Codex marketplace for the shared skills.
 - `.claude-plugin/marketplace.json`: the repository is now a Claude Code plugin marketplace. Run `/plugin marketplace add SagarYadav17/dotfiles` and `/plugin install sagar-skills@sagar` to get the skills without symlinks. `.stow-local-ignore` skips `.claude-plugin`.
 - `dispatch-agents`: optional Discord notices (`scripts/notify.py`). A notice is posted only when a webhook URL is in `~/.config/dispatch-agents/discord-webhook` or `DISPATCH_DISCORD_WEBHOOK`. Notices hold ids, codes, counts and flag names, never code or logs.
 - `run_worker.sh --review`: Codex reviews the worktree changes with `codex exec review`. The review uses Codex usage, not Claude tokens.
-
 - Skill `dispatch-agents`: Claude plans and reviews. Codex does the coding in separate git worktrees. The script `run_worker.sh` runs one Codex task and returns code 75 when Codex reaches its usage limit.
 - `.profile`: adds the mise shims to `PATH`. Bash, non-interactive shells and desktop apps now find `node` and `codex`. `install.sh` backs up an existing `~/.profile` before `stow` links it.
-
 - `run_worker.sh` options `--check` and `--allow`. The script runs the checks in the worktree after the worker, compares the diff with the allow-list, and prints a short report. The report flags edited tests, dependency files, files outside the allow-list and worker commits.
 - Workers reply in JSON (`assets/result-schema.json`). The report shows the token usage of each run.
 - `install.sh` links `skills/` to `~/.gemini/config/skills`. The Antigravity CLI (`agy`) now reads the same skills as Claude and Codex.
@@ -22,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Install global `uv` and Bun with `mise`.
 - `run_worker.sh` returns code 3 when a task needs review. Code 0 now means: the worker is done, all checks passed, and no flag is set.
 - `run_worker.sh` looks for usage-limit words only in the agent's own error messages. Before, test output with `429` or `quota` gave a false code 75.
 - The worker preamble tells workers to use a skill only when the brief names it, and not to use project memory or `dispatch-agents`.
@@ -33,6 +35,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Removed
 
+- Stop creating skill links during workstation setup.
+- Remove Graphify from the installer and agent instructions.
 - The Claude Code plugin `minecraft-hud` and the `plugins/` folder.
 - `install.ps1` and all other Windows setup (Python, `graphify`, skill links, Git line endings).
 - The `*.ps1` rule in `.gitattributes`.

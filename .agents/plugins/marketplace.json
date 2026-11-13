@@ -1,0 +1,20 @@
+{
+  "name": "sagar",
+  "interface": {
+    "displayName": "Sagar Skills"
+  },
+  "plugins": [
+    {
+      "name": "sagar-skills",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

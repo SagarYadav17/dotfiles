@@ -115,52 +115,26 @@ install_mise() {
 }
 
 install_uv() {
-  if has_cmd uv; then
-    log "uv already installed"
-    return
-  fi
-
-  log "Installing uv"
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-}
-
-install_graphify() {
-  # uv puts its tools in ~/.local/bin; the uv installer does not change PATH of this script.
+  # The mise installer places the binary here on a fresh system.
   export PATH="$HOME/.local/bin:$PATH"
 
-  if ! has_cmd uv; then
-    warn "uv not found; skipping graphify"
-    return
+  if mise config get --global tools.uv >/dev/null 2>&1; then
+    log "Installing the configured global uv version"
+    mise -C "$HOME" install uv
+  else
+    log "Installing uv with mise"
+    mise use --global uv@latest
   fi
-
-  if uv tool list 2>/dev/null | grep -q '^graphifyy '; then
-    log "graphify already installed"
-    return
-  fi
-
-  log "Installing graphify"
-  uv tool install graphifyy
-}
-
-install_graphify_skill() {
-  export PATH="$HOME/.local/bin:$PATH"
-  has_cmd graphify || return 0
-
-  # ~/.claude/skills and ~/.agents/skills point into this repo, so this writes skills/graphify
-  # (git-ignored). It must run after link_custom_skills.
-  log "Installing graphify skill"
-  graphify install --platform claude || warn "graphify skill install (claude) failed"
-  graphify install --platform agents || warn "graphify skill install (agents) failed"
 }
 
 install_bun() {
-  if has_cmd bun; then
-    log "Bun already installed"
-    return
+  if mise config get --global tools.bun >/dev/null 2>&1; then
+    log "Installing the configured global Bun version"
+    mise -C "$HOME" install bun
+  else
+    log "Installing Bun with mise"
+    mise use --global bun@latest
   fi
-
-  log "Installing Bun"
-  curl -fsSL https://bun.com/install | bash
 }
 
 install_oh_my_zsh() {
@@ -203,7 +177,7 @@ stow_dotfiles() {
   # Create the folders first. With --no-folding stow links single files into them; without these
   # folders stow would link the whole folder into the repository, and Claude Code and Codex would
   # write credentials and sessions there.
-  mkdir -p "$HOME/.claude" "$HOME/.codex"
+  mkdir -p "$HOME/.claude" "$HOME/.codex" "$HOME/.config/systemd/user"
 
   backup_if_regular_file "$HOME/.zshrc" "$REPO_DIR/.zshrc"
   backup_if_regular_file "$HOME/.gitconfig" "$REPO_DIR/.gitconfig"
@@ -221,60 +195,19 @@ stow_dotfiles() {
   chmod 600 "$REPO_DIR/.claude/CLAUDE.md"
 }
 
-link_skills_target() {
-  local skills_dir="$1"
-  local target="$2"
-
-  mkdir -p "$(dirname "$target")"
-
-  if [[ -L "$target" ]]; then
-    if [[ "$(readlink -f "$target")" == "$(readlink -f "$skills_dir")" ]]; then
-      log "Custom skills already linked at $target"
-      return
-    fi
-
-    error "$target is already a symlink to another location. Move it before rerunning."
-    exit 1
-  fi
-
-  if [[ -e "$target" ]]; then
-    local backup="${target}.backup-${STAMP}"
-    mv "$target" "$backup"
-    log "Preserved existing skills directory at $backup"
-  fi
-
-  ln -s "$skills_dir" "$target"
-  log "Linked custom skills to $target"
-}
-
-link_custom_skills() {
-  local skills_dir="$REPO_DIR/skills"
-
-  # ~/.agents/skills: Codex and other tools following the shared
-  # agents-skills convention.
-  link_skills_target "$skills_dir" "$HOME/.agents/skills"
-
-  # ~/.claude/skills: Claude Code only scans this fixed location, not
-  # ~/.agents/skills.
-  link_skills_target "$skills_dir" "$HOME/.claude/skills"
-
-  # ~/.gemini/config/skills: the Antigravity CLI (agy) reads global skills only
-  # here; it reads .agents/skills inside a project, not in $HOME.
-  link_skills_target "$skills_dir" "$HOME/.gemini/config/skills"
-}
-
 main() {
   log "Starting dotfiles installation"
   install_system_packages
   install_mise
   install_uv
-  install_graphify
   install_bun
   install_oh_my_zsh
   install_zsh_plugins
   stow_dotfiles
-  link_custom_skills
-  install_graphify_skill
+  if command -v systemctl >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
+    systemctl --user daemon-reload
+    systemctl --user enable --now dotfiles-ssh-agent.service
+  fi
 
   log "Installation complete"
   log "Open a new shell session or run: exec zsh"

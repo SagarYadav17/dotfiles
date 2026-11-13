@@ -16,7 +16,7 @@ Run the installer script:
 ./install.sh
 ```
 
-The script installs dependencies (including `unzip` and `btop`), sets up `mise`, `uv`, `graphify` (`uv tool install graphifyy`), Bun, `oh-my-zsh`, required zsh plugins, runs `stow`, and links the repository's custom skills into `$HOME/.agents/skills`, `$HOME/.claude/skills` and `$HOME/.gemini/config/skills`.
+The script installs dependencies (including `unzip` and `btop`), sets up `mise`, `uv`, Bun, `oh-my-zsh`, required zsh plugins, runs `stow`.
 
 The installer requires Bash and supports `apt` (Ubuntu) and `dnf` (Fedora, RHEL). On RHEL and its clones it first enables EPEL (and CodeReady Builder when `crb` exists), because `stow`, `ripgrep` and `btop` come from there.
 
@@ -63,7 +63,7 @@ If you prefer manual setup, use the steps below.
 4. Install uv (Python package and project manager)
 
    ```sh
-   curl -LsSf https://astral.sh/uv/install.sh | sh
+   "$HOME/.local/bin/mise" use --global uv@latest
    ```
 
 5. Install `oh-my-zsh` if it is not already installed:
@@ -75,7 +75,7 @@ If you prefer manual setup, use the steps below.
 6. Install Bun if it is not already installed:
 
    ```sh
-   curl -fsSL https://bun.com/install | bash
+   "$HOME/.local/bin/mise" use --global bun@latest
    ```
 
 7. Install `zsh-autosuggestions` if it is not already installed:
@@ -93,29 +93,18 @@ If you prefer manual setup, use the steps below.
 9. Run `stow` to create the necessary symlinks. Create the folders first and use `--no-folding`; without them stow could link the whole `~/.claude` folder into the repository, and Claude Code would write its credentials and sessions there:
 
    ```sh
-   mkdir -p ~/.claude ~/.codex
+   mkdir -p ~/.claude ~/.codex ~/.config/systemd/user
    cd $HOME/dotfiles
    stow --no-folding .
    chmod 600 .claude/CLAUDE.md
    ```
 
-10. (Optional) Link custom skills for other agents:
+The installer enables a systemd user service for `ssh-agent` when available.
+A shell uses its existing agent when one is already set.
 
-   If you're running the full `install.sh`, this is handled automatically.
-   For manual setups only, link the skills directory:
+## Install skills from GitHub
 
-   ```sh
-   mkdir -p "$HOME/.agents"
-   ln -s "$HOME/dotfiles/skills" "$HOME/.agents/skills"
-
-   # Antigravity CLI (agy) reads global skills only from this folder
-   mkdir -p "$HOME/.gemini/config"
-   ln -s "$HOME/dotfiles/skills" "$HOME/.gemini/config/skills"
-   ```
-
-## Install skills from GitHub (Claude Code)
-
-This repository is also a Claude Code plugin marketplace. Use it on a device where you do not run `install.sh`. Run these commands in Claude Code:
+The marketplace provides the same skills to Claude Code and Codex. Run these commands in Claude Code:
 
 ```
 /plugin marketplace add SagarYadav17/dotfiles
@@ -124,12 +113,20 @@ This repository is also a Claude Code plugin marketplace. Use it on a device whe
 
 Skills get the prefix `sagar-skills:`, for example `/sagar-skills:ste-output`. To get new commits, run `/plugin marketplace update sagar`, or turn on auto-update for the marketplace in `/plugin`.
 
+For Codex, add the marketplace from a terminal:
+
+```sh
+codex plugin marketplace add SagarYadav17/dotfiles
+codex plugin add sagar-skills@sagar
+```
+
+Run `codex plugin marketplace upgrade sagar` to fetch new commits. Restart Codex after updating. You can also select the repository marketplace in the Codex desktop plugin directory.
+
 Notes:
 
-- The marketplace serves Claude Code only. Codex and the Antigravity CLI still need the `install.sh` links.
-- Do not use both methods on one device. Each skill would load twice.
-- `graphify` is not in the marketplace. The command `graphify install` creates it.
-- `curate-project-memory` runs scripts by path. The global `CLAUDE.md` names `~/.agents/skills` and `~/.claude/skills`. A plugin install keeps the skills in the plugin cache, so use the `install.sh` links on devices that need project memory.
+- Install the marketplace plugin separately in each agent.
+- Project Memory requires its installed skill directory and local vault access.
+- Gemini requires a compatible skill installation method for its environment.
 
 ## Contents
 
@@ -137,7 +134,7 @@ Notes:
 - `.profile`: Login-shell `PATH`. It adds the mise shims (`~/.local/share/mise/shims`), so `node` and `codex` work in bash, in non-interactive shells and in desktop apps, not only in an interactive zsh. Log out and log in again after the first install.
 - `.gitconfig`: Configuration for Git (`core.autocrlf=input`, `fetch.prune=true`). Repositories under `~/work/` also read `~/.gitconfig.work`, which is not tracked: create it on a machine that needs another identity.
 - `.claude/CLAUDE.md`: Global instructions for Claude Code and Codex: the Project Memory block, and STE (skill `ste-output`) as the default writing style. Say "stop ste" or "normal mode" to turn STE off for one session. The Antigravity CLI (`agy`) has no global rules file, so it does not get these instructions. `~/.codex/AGENTS.md` is a second link to this one file, so the two cannot differ. Edit the copy in this repository, not the one in your home folder: some editors replace a symlink with a normal file.
-- `skills/`: Custom agent skills shared through `$HOME/.agents/skills` (Codex), `$HOME/.claude/skills` (Claude Code) and `$HOME/.gemini/config/skills` (Antigravity CLI, `agy`).
+- `skills/`: Custom skills packaged for the Claude Code and Codex marketplaces.
 - `install.sh`: Installer for Linux.
 - `CHANGELOG.MD`: Notable changes. Add each notable change under `Unreleased`, in Keep a Changelog categories and ASD-STE100 Simplified Technical English (skill `ste-output`).
 

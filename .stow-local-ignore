@@ -8,3 +8,5 @@ install\.sh
 \.stow-local-ignore
 ^/skills$
 ^/\.claude-plugin$
+^/\.agents$
+^/plugin\.json$
