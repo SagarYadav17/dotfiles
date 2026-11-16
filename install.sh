@@ -199,7 +199,52 @@ stow_dotfiles() {
   chmod 600 "$REPO_DIR/.claude/CLAUDE.md"
 }
 
+setup_ssh_keys() {
+  log "Setting up SSH authorized keys from Launchpad"
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+
+  local auth_keys="$HOME/.ssh/authorized_keys"
+  touch "$auth_keys"
+  chmod 600 "$auth_keys"
+
+  local keys
+  if keys="$(curl -fsSL "https://launchpad.net/~sagaryadav17/+sshkeys")" && [[ -n "$keys" ]]; then
+    while IFS= read -r key; do
+      [[ -z "$key" ]] && continue
+      if ! grep -qF "$key" "$auth_keys" 2>/dev/null; then
+        printf "%s\n" "$key" >> "$auth_keys"
+      fi
+    done <<< "$keys"
+    log "SSH keys imported to $auth_keys"
+  else
+    warn "Could not fetch SSH keys from Launchpad"
+  fi
+}
+
 main() {
+  local setup_ssh="${SETUP_SSH_KEYS:-false}"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --ssh-keys|--vm)
+        setup_ssh=true
+        shift
+        ;;
+      -h|--help)
+        printf "Usage: %s [OPTIONS]\n\n" "$0"
+        printf "Options:\n"
+        printf "  --ssh-keys, --vm    Import Launchpad SSH keys to ~/.ssh/authorized_keys (for VMs)\n"
+        printf "  -h, --help          Show this help message\n"
+        exit 0
+        ;;
+      *)
+        error "Unknown option: $1"
+        exit 1
+        ;;
+    esac
+  done
+
   log "Starting dotfiles installation"
   install_system_packages
   install_mise
@@ -208,6 +253,9 @@ main() {
   install_oh_my_zsh
   install_zsh_plugins
   stow_dotfiles
+  if [[ "$setup_ssh" == true || "$setup_ssh" == "1" ]]; then
+    setup_ssh_keys
+  fi
   if command -v systemctl >/dev/null 2>&1 && systemctl --user show-environment >/dev/null 2>&1; then
     systemctl --user daemon-reload
     systemctl --user enable --now dotfiles-ssh-agent.service

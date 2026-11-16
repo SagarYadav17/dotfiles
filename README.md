@@ -13,7 +13,19 @@ git clone https://github.com/SagarYadav17/dotfiles.git "$HOME/dotfiles" && cd "$
 Run the installer script:
 
 ```sh
+# Standard installation
 ./install.sh
+
+# VM installation (imports Launchpad SSH keys to ~/.ssh/authorized_keys)
+./install.sh --ssh-keys    # or: ./install.sh --vm
+```
+
+You can also import your Launchpad SSH keys manually:
+
+```sh
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+curl -fsSL "https://launchpad.net/~sagaryadav17/+sshkeys" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
 ```
 
 The script installs dependencies (including `unzip` and `btop`), sets up `mise`, `uv`, Bun, `oh-my-zsh`, required zsh plugins, runs `stow`.
