@@ -10,3 +10,4 @@ install\.sh
 ^/\.claude-plugin$
 ^/\.agents$
 ^/plugin\.json$
+^/kimi\.plugin\.json$

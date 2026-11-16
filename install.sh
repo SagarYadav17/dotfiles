@@ -191,6 +191,10 @@ stow_dotfiles() {
   # Codex reads the same global instructions as Claude Code: one tracked file, two links.
   ln -sfn "$REPO_DIR/.claude/CLAUDE.md" "$HOME/.codex/AGENTS.md"
 
+  # Link repository as an Antigravity plugin so all skills load automatically.
+  mkdir -p "$HOME/.gemini/config/plugins"
+  ln -sfn "$REPO_DIR" "$HOME/.gemini/config/plugins/sagar-skills"
+
   # Git does not store this mode; the global Claude instructions are private.
   chmod 600 "$REPO_DIR/.claude/CLAUDE.md"
 }

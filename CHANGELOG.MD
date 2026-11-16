@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- `kimi.plugin.json`: add plugin manifest for Kimi Code CLI.
+- `install.sh`: link repository to `~/.gemini/config/plugins/sagar-skills` for Antigravity.
+- `.stow-local-ignore`: ignore `kimi.plugin.json` during stow linking.
 - Share one SSH agent across shell sessions with systemd.
 
 - Add a Codex marketplace for the shared skills.

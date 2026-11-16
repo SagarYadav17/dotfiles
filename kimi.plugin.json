@@ -1,0 +1,18 @@
+{
+  "$schema": "https://kimi.com/schemas/kimi.plugin.schema.json",
+  "name": "sagar-skills",
+  "version": "1.0.2",
+  "description": "Reusable skills for project memory, development, deployment, and technical writing.",
+  "author": {
+    "name": "Sagar Yadav"
+  },
+  "homepage": "https://github.com/SagarYadav17/dotfiles",
+  "repository": "https://github.com/SagarYadav17/dotfiles",
+  "interface": {
+    "displayName": "Sagar Skills",
+    "shortDescription": "Reusable skills for project memory, development, deployment, and technical writing.",
+    "developerName": "Sagar Yadav",
+    "websiteURL": "https://github.com/SagarYadav17/dotfiles"
+  },
+  "skills": "./skills/"
+}

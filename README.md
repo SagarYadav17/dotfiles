@@ -122,11 +122,24 @@ codex plugin add sagar-skills@sagar
 
 Run `codex plugin marketplace upgrade sagar` to fetch new commits. Restart Codex after updating. You can also select the repository marketplace in the Codex desktop plugin directory.
 
+For Kimi Code CLI, install the plugin from chat or terminal:
+
+```sh
+/plugins install https://github.com/SagarYadav17/dotfiles
+```
+
+Or install from a local clone:
+
+```sh
+kimi plugin install "$HOME/dotfiles"
+```
+
+For Antigravity, `install.sh` automatically links the repository to `~/.gemini/config/plugins/sagar-skills`. You can review or toggle the plugin at `customization://sagar-skills`.
+
 Notes:
 
 - Install the marketplace plugin separately in each agent.
 - Project Memory requires its installed skill directory and local vault access.
-- Gemini requires a compatible skill installation method for its environment.
 
 ## Contents
 
